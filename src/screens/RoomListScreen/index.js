@@ -4,13 +4,17 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import { Container, Content, Card, CardItem, Button, Fab, Item, Label, Input } from "native-base";
 import Modal from "react-native-modal";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {setData, getData} from '../../services';
 
 export default function RoomListScreen(props) {
     const [modal, setModal] = useState(false);
+    const [roomList, setRoomList] = useState([]);
     const [modalDelete, setModalDelete] = useState(false);
     const [input, setInput] = useState('');
-    function viewDevices () {
-      props.navigation.push('DEVICES_LIST_SCREEN')
+    const [roomSelected, setRoomSelected] = useState(-1);
+
+    function viewDevices (roomIndex) {
+      props.navigation.push('DEVICES_LIST_SCREEN', {roomIndex: roomIndex})
     };
 
     function modalComponent () {
@@ -23,7 +27,7 @@ export default function RoomListScreen(props) {
           <View style={styles.viewModal}>
             <Item floatingLabel>
               <Label>Nome</Label>
-              <Input value={input} onChange={(valueChanged) => setInput(valueChanged)}/>
+              <Input value={input} onChangeText={(value) => setInput(value)}/>
             </Item>
             <View style={styles.buttonsModal}>
               <Button rounded style={styles.buttonSave} onPress={() => saveButton()}>
@@ -50,7 +54,7 @@ export default function RoomListScreen(props) {
                 <Button rounded style={styles.buttonNo} onPress={() => setModalDelete(false)}>
                   <Text style={styles.textButtonDelete}>Não</Text>
                 </Button>
-                <Button rounded style={styles.buttonYes} onPress={() => setModalDelete(false)}>
+                <Button rounded style={styles.buttonYes} onPress={() => deleteRoom()}>
                   <Text style={styles.textButtonDelete}>Sim</Text>
                 </Button>
               </View>
@@ -60,17 +64,54 @@ export default function RoomListScreen(props) {
     };
 
 
-    function openModal () {
-      setInput('Teste')
+    const deleteRoom = async () => {
+      roomList.splice(roomSelected, 1);
+      await setData(roomList);
+      await getRoomList();
+      setModalDelete(false);
+    }
+
+    function openModal (roomName, index) {
+      setRoomSelected(index)
+      setInput(roomName)
       setModal(true);
     };
 
-    function openDeleteModal () {
+    function openDeleteModal (index) {
       setModalDelete(true);
+      setRoomSelected(index)
     }
 
-    function saveButton () {
+    const saveButton = async () => {
+      if(roomSelected !== -1) {
+        await setData(roomList[roomSelected].room = input)
+        console.log('edit')
+      }else {
+        console.log('novo')
+        await setData([
+          ...roomList,
+          {
+            room: input,
+            devices: []
+          }
+        ])
+      }
+      await getRoomList();
       setModal(false);
+    }
+
+    useEffect (() => {
+      getRoomList()
+    }, [])
+
+    const getRoomList = async () => {
+      let value = await getData();
+      setRoomList(value);
+    }
+
+    const newRoom = () => {
+      openModal()
+      setRoomSelected(-1)
     }
 
     return (
@@ -79,23 +120,23 @@ export default function RoomListScreen(props) {
         {confirmDeleteModal()}
         <Content padder>
           {
-            [1,2,3,4].map((value, index) => (
+            roomList.map((item, index) => (
               <Card style={styles.card} key={index}>
                 <CardItem style={styles.cardItem}>
-                  <Text>Cozinha</Text>
+                  <Text>{item.room}</Text>
                   <View style={styles.viewButtons}>
                     <TouchableOpacity>
-                      <Button onPress={() => viewDevices()} rounded style={styles.buttonEye}>
+                      <Button onPress={() => viewDevices(index)} rounded style={styles.buttonEye}>
                         <Icon name="eye" size={20} color="#fff" />
                       </Button>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                      <Button rounded style={styles.buttonEdit} onPress={() => openModal()}>
+                      <Button rounded style={styles.buttonEdit} onPress={() => openModal(item.room, index)}>
                         <Icon name="pencil" size={20} color="#fff" />
                       </Button>
                     </TouchableOpacity>                    
                     <TouchableOpacity>
-                      <Button rounded style={styles.buttonDelete} onPress={() => openDeleteModal()}>
+                      <Button rounded style={styles.buttonDelete} onPress={() => openDeleteModal(index)}>
                         <Icon name="trash-o" size={20} color="#fff" />
                       </Button>
                     </TouchableOpacity>
@@ -105,7 +146,7 @@ export default function RoomListScreen(props) {
             ))
           }
         </Content>
-        <Fab position="bottomRight" style={styles.fab} onPress={() => openModal()}>
+        <Fab position="bottomRight" style={styles.fab} onPress={() => newRoom()}>
           <Text>+</Text>
         </Fab>
       </Container>
