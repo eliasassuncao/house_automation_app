@@ -11,7 +11,7 @@ const setData = async (data) => {
   const getData = async () => {
     try {
       const data = await AsyncStorage.getItem('ROOM_LIST') || []
-      return JSON.parse(data)
+      return (typeof data === 'object') ? data : JSON.parse(data)
     } catch(e) {
         console.log(e)
     }

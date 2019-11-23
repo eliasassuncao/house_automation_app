@@ -84,17 +84,11 @@ export default function RoomListScreen(props) {
 
     const saveButton = async () => {
       if(roomSelected !== -1) {
-        await setData(roomList[roomSelected].room = input)
-        console.log('edit')
+        roomList[roomSelected].room = input
+        await setData(roomList)
       }else {
-        console.log('novo')
-        await setData([
-          ...roomList,
-          {
-            room: input,
-            devices: []
-          }
-        ])
+        roomList.push({room: input, devices:[]})
+        await setData(roomList)
       }
       await getRoomList();
       setModal(false);
@@ -110,7 +104,8 @@ export default function RoomListScreen(props) {
     }
 
     const newRoom = () => {
-      openModal()
+      setInput('')
+      setModal(true);
       setRoomSelected(-1)
     }
 
