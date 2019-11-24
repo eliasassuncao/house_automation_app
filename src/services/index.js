@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage';
 
-const setData = async (data) => {
+// Setar JSON no storage
+  const setData = async (data) => {
     try {
         await AsyncStorage.setItem('ROOM_LIST', JSON.stringify(data))
     } catch (e) {
@@ -8,6 +9,7 @@ const setData = async (data) => {
     }
   }
 
+  // Buscar JSON no storage
   const getData = async () => {
     try {
       const data = await AsyncStorage.getItem('ROOM_LIST') || []

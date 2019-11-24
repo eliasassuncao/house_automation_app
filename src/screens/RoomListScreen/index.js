@@ -13,10 +13,12 @@ export default function RoomListScreen(props) {
     const [input, setInput] = useState('');
     const [roomSelected, setRoomSelected] = useState(-1);
 
+    //Navegar para a tela de dispositivos, mandando o indice da sala
     function viewDevices (roomIndex) {
       props.navigation.push('DEVICES_LIST_SCREEN', {roomIndex: roomIndex})
     };
 
+    // Modal de Criar/Editar cômodo
     function modalComponent () {
       return (
         <Modal
@@ -39,6 +41,7 @@ export default function RoomListScreen(props) {
       )
     }
 
+    // Modal de confirmar a remoção do cômodo
     function confirmDeleteModal () {
         return (
           <Modal
@@ -64,6 +67,11 @@ export default function RoomListScreen(props) {
     };
 
 
+    /* 
+      - Deletar cômodo com base no dispositivo selecionado
+      - Guardar novo JSON no storage
+      - Atualizar minha lista de cômodos
+    */
     const deleteRoom = async () => {
       roomList.splice(roomSelected, 1);
       await setData(roomList);
@@ -71,17 +79,23 @@ export default function RoomListScreen(props) {
       setModalDelete(false);
     }
 
+    // Abrir modal de inserção/edição do cômodo
     function openModal (roomName, index) {
       setRoomSelected(index)
       setInput(roomName)
       setModal(true);
     };
 
+    // Abrir modal de remoção do cômodo
     function openDeleteModal (index) {
       setModalDelete(true);
       setRoomSelected(index)
     }
 
+    /*
+      Verificar se tem cômodo selecionado para saber se irá fazer a inserção ou edição,
+      e atualizar a lista.
+    */
     const saveButton = async () => {
       if(roomSelected !== -1) {
         roomList[roomSelected].room = input
@@ -94,15 +108,18 @@ export default function RoomListScreen(props) {
       setModal(false);
     }
 
+    // Buscar lista no storage ao abrir a tela
     useEffect (() => {
       getRoomList()
     }, [])
 
+    // função de buscar lista no storage
     const getRoomList = async () => {
       let value = await getData();
       setRoomList(value);
     }
 
+    // Abrir modal de inserção/edição especificando que irá ser de inserção
     const newRoom = () => {
       setInput('')
       setModal(true);

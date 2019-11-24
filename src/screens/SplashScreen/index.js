@@ -3,6 +3,7 @@ import styles from './styles'
 import {View, Text, Image, ActivityIndicator} from 'react-native';
 import { Container, Content } from "native-base";
 
+// Tela de Splash
 export default function SplashScreen(props) {
 
     useEffect(() => {

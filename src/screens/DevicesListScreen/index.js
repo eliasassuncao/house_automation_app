@@ -15,24 +15,31 @@ export default function DevicesListScreen(props) {
     const [roomSelected, setRoomSelected] = useState(0);
     const [loading, setLoading] = useState(true)
 
+    /*
+      Guardar indice da sala selecionada
+      Buscar lista
+    */
     useEffect(() => {
       let roomIndex = props.navigation.getParam('roomIndex');
       setRoomSelected(roomIndex)
       getDeviceList()
     }, [])
 
+    // Buscar lista no storage
     const getDeviceList = async () => {
       let roomList = await getData();
       setRoomList(roomList);
       setLoading(false)
     }
 
+    // Editar status do dispositivo selecionado e atualizar a lista
     const onChangeToggle = async(indexDevice, valueStatus) => {
       roomList[roomSelected].devices[indexDevice].status = !valueStatus
       await setData(roomList)
       await getDeviceList()
     };
 
+    // Modal de confirmação de remoção do dispositivo
     function confirmDeleteModal () {
       return (
         <Modal
@@ -57,6 +64,7 @@ export default function DevicesListScreen(props) {
       )
     };
 
+    // Função de remoção do dispositivo e atualizar lista
     const deleteDevice = async () => {
       roomList[roomSelected].devices.splice(deviceSelected,1);
       await setData(roomList);
@@ -64,6 +72,7 @@ export default function DevicesListScreen(props) {
       setModalDelete(false);
     }
 
+    // Modal de inserção/edição do dispositivo
     function modalComponent () {
       return (
         <Modal
@@ -86,6 +95,7 @@ export default function DevicesListScreen(props) {
       )
     }
 
+    // Abrir modal de inserção/edição
     function openModal (roomName, index) {
       setDeviceSelected(index)
       setInput(roomName)
@@ -93,6 +103,10 @@ export default function DevicesListScreen(props) {
     };
 
 
+    /*
+      Verificar se tem dispositivo selecionado para saber se irá fazer a inserção ou edição,
+      e atualizar a lista.
+    */
     const saveButton = async() => {
       if(deviceSelected !== -1) {
         roomList[roomSelected].devices[deviceSelected].device = input
@@ -105,12 +119,14 @@ export default function DevicesListScreen(props) {
       setModal(false);
     }
 
+    // Abrir modal de confirmação de remoção do dispositivo
     function openDeleteModal (index) {
       setModalDelete(true);
       setDeviceSelected(index)
     }
 
-    const newRoom = () => {
+    // Abrir modal de inserção/edição especificando que irá ser de inserção
+    const newDevice = () => {
       setDeviceSelected(-1)
       setInput('')
       setModal(true);
@@ -150,7 +166,7 @@ export default function DevicesListScreen(props) {
             ))
           }
         </Content>
-        <Fab position="bottomRight" style={styles.fab} onPress={() => newRoom()}>
+        <Fab position="bottomRight" style={styles.fab} onPress={() => newDevice()}>
           <Text>+</Text>
         </Fab>
       </Container>
